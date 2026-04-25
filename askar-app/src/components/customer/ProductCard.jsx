@@ -1,11 +1,10 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { getImageUrl } from '../../lib/supabase'
 
 export default function ProductCard({ product, showSalePercent = false }) {
   const categoryName = product.categories?.name || product.category || ''
-  const mainImage = product.images?.[0]
-    ? (product.images[0].startsWith('http') ? product.images[0] : `/gallary/${product.images[0]}`)
-    : '/gallary/images.jpg'
+  const mainImage = getImageUrl(product.images?.[0])
 
   return (
     <div className="product-card group" id={`product-${product.id}`}>

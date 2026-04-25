@@ -1,31 +1,27 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
-import { supabase } from '../../lib/supabase'
+import { supabase, getImageUrl } from '../../lib/supabase'
 import Navbar from '../../components/customer/Navbar'
 import Footer from '../../components/customer/Footer'
 
-const categoryImages = {
-  'Menswear': '/gallary/images.jpg',
-  'Womenswear': '/gallary/images (1).jpg',
-  'Accessories': '/gallary/download.avif',
-}
-
 const defaultCategories = [
-  { name: 'MENSWEAR', image: '/gallary/images.jpg' },
-  { name: 'WOMENSWEAR', image: '/gallary/images (1).jpg' },
-  { name: 'ACCESSORIES', image: '/gallary/download.avif' },
+  { name: 'MENSWEAR', image_url: '/gallary/images.jpg' },
+  { name: 'WOMENSWEAR', image_url: '/gallary/images (1).jpg' },
+  { name: 'ACCESSORIES', image_url: '/gallary/download.avif' },
 ]
 
 export default function HomePage() {
   const [categories, setCategories] = useState([])
+  const [settings, setSettings] = useState(null)
 
   useEffect(() => {
     fetchCategories()
+    fetchSettings()
   }, [])
 
   async function fetchCategories() {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('categories')
       .select('*')
       .limit(3)
@@ -36,6 +32,20 @@ export default function HomePage() {
       setCategories(defaultCategories)
     }
   }
+
+  async function fetchSettings() {
+    const { data } = await supabase
+      .from('site_settings')
+      .select('*')
+      .limit(1)
+      .single()
+    if (data) setSettings(data)
+  }
+
+  // Resolve hero video: Supabase Storage → local fallback
+  const heroVideo = settings?.hero_video_url
+    ? getImageUrl(settings.hero_video_url, '/gallary/6001344810424737532.mp4')
+    : '/gallary/6001344810424737532.mp4'
 
   return (
     <div className="min-h-screen bg-white">
@@ -50,7 +60,7 @@ export default function HomePage() {
           playsInline
           className="absolute inset-0 w-full h-full object-cover opacity-60"
         >
-          <source src="/gallary/6001344810424737532.mp4" type="video/mp4" />
+          <source src={heroVideo} type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
@@ -80,7 +90,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {(categories.length > 0 ? categories : defaultCategories).map((cat, index) => {
             const catName = cat.name?.toUpperCase() || ''
-            const catImage = cat.image_url || cat.image || categoryImages[cat.name] || `/gallary/images.jpg`
+            const catImage = getImageUrl(cat.image_url, '/gallary/images.jpg')
             return (
               <Link
                 key={cat.id || index}
@@ -114,8 +124,8 @@ export default function HomePage() {
             THE ASKAR STANDARD
           </h2>
           <p className="text-gray-400 text-base md:text-lg leading-relaxed mb-10 max-w-2xl mx-auto">
-            Every piece we create is a testament to our unwavering commitment to quality, craftsmanship, 
-            and timeless design. We believe clothing should not just be worn — it should be experienced. 
+            Every piece we create is a testament to our unwavering commitment to quality, craftsmanship,
+            and timeless design. We believe clothing should not just be worn — it should be experienced.
             From carefully sourced fabrics to precision tailoring, every detail matters.
           </p>
           <button className="btn-outline">

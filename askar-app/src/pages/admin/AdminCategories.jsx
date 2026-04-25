@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
-import { supabase } from '../../lib/supabase'
-import { Plus, Pencil, Trash2, X } from 'lucide-react'
+import React, { useEffect, useState, useRef } from 'react'
+import { supabase, getImageUrl, uploadImage } from '../../lib/supabase'
+import { Plus, Pencil, Trash2, X, Upload } from 'lucide-react'
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState([])
@@ -10,6 +10,8 @@ export default function AdminCategories() {
   const [editId, setEditId] = useState(null)
   const [form, setForm] = useState({ name: '', image_url: '' })
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef(null)
 
   useEffect(() => { fetchData() }, [])
 
@@ -47,6 +49,16 @@ export default function AdminCategories() {
     fetchData()
   }
 
+  async function handleFileUpload(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const fileName = await uploadImage(file, 'categories')
+    if (fileName) setForm(prev => ({ ...prev, image_url: fileName }))
+    setUploading(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin"></div></div>
 
   return (
@@ -61,7 +73,11 @@ export default function AdminCategories() {
           <tbody>
             {categories.map(c => (
               <tr key={c.id}>
-                <td><div className="w-12 h-12 bg-gray-100 overflow-hidden rounded"><img src={c.image_url ? (c.image_url.startsWith('http') ? c.image_url : `/gallary/${c.image_url}`) : '/gallary/images.jpg'} alt="" className="w-full h-full object-cover" /></div></td>
+                <td>
+                  <div className="w-12 h-12 bg-gray-100 overflow-hidden rounded">
+                    <img src={getImageUrl(c.image_url)} alt="" className="w-full h-full object-cover" />
+                  </div>
+                </td>
                 <td className="font-medium">{c.name}</td>
                 <td>{productCounts[c.id] || 0}</td>
                 <td>
@@ -84,9 +100,47 @@ export default function AdminCategories() {
               <button onClick={() => setShowModal(false)}><X size={20} /></button>
             </div>
             <div className="space-y-4">
-              <div><label className="block text-xs font-semibold tracking-wider mb-1">CATEGORY NAME</label><input value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="admin-input" /></div>
-              <div><label className="block text-xs font-semibold tracking-wider mb-1">IMAGE (gallery filename or URL)</label><input value={form.image_url} onChange={e => setForm({...form, image_url: e.target.value})} className="admin-input" placeholder="e.g. images.jpg" /></div>
-              <button onClick={handleSave} disabled={saving} className="w-full admin-btn py-3">{saving ? 'SAVING...' : 'SAVE CATEGORY'}</button>
+              <div>
+                <label className="block text-xs font-semibold tracking-wider mb-1">CATEGORY NAME</label>
+                <input value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="admin-input" />
+              </div>
+
+              {/* Image upload */}
+              <div>
+                <label className="block text-xs font-semibold tracking-wider mb-2">CATEGORY IMAGE</label>
+
+                {form.image_url ? (
+                  <div className="relative w-full aspect-video bg-gray-100 rounded overflow-hidden mb-2">
+                    <img src={getImageUrl(form.image_url)} alt="" className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => setForm({...form, image_url: ''})}
+                      className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-black transition-colors"
+                  >
+                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+                    {uploading ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                        <span className="text-xs text-gray-500">Uploading…</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <Upload size={24} className="text-gray-400" />
+                        <span className="text-xs text-gray-500">Click to upload image</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <button onClick={handleSave} disabled={saving || uploading} className="w-full admin-btn py-3">{saving ? 'SAVING...' : 'SAVE CATEGORY'}</button>
             </div>
           </div>
         </div>

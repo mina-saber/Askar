@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
-import { supabase } from '../../lib/supabase'
-import { Plus, Pencil, Trash2, X } from 'lucide-react'
+import React, { useEffect, useState, useRef } from 'react'
+import { supabase, getImageUrl, uploadImage, deleteImage } from '../../lib/supabase'
+import { Plus, Pencil, Trash2, X, Upload, ImageIcon } from 'lucide-react'
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 const emptyForm = { name: '', category_id: '', price: '', sale_price: '', description: '', sizes: [], stock_quantity: 0, is_new: false, is_sale: false, images: [] }
@@ -12,8 +12,9 @@ export default function AdminProducts() {
   const [showModal, setShowModal] = useState(false)
   const [editId, setEditId] = useState(null)
   const [form, setForm] = useState({ ...emptyForm })
-  const [imageInput, setImageInput] = useState('')
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef(null)
 
   useEffect(() => { fetchData() }, [])
 
@@ -28,7 +29,7 @@ export default function AdminProducts() {
     setLoading(false)
   }
 
-  function openAdd() { setEditId(null); setForm({ ...emptyForm }); setImageInput(''); setShowModal(true) }
+  function openAdd() { setEditId(null); setForm({ ...emptyForm }); setShowModal(true) }
 
   function openEdit(product) {
     setEditId(product.id)
@@ -38,7 +39,6 @@ export default function AdminProducts() {
       sizes: product.sizes || [], stock_quantity: product.stock_quantity || 0,
       is_new: product.is_new, is_sale: product.is_sale, images: product.images || [],
     })
-    setImageInput('')
     setShowModal(true)
   }
 
@@ -71,11 +71,29 @@ export default function AdminProducts() {
     fetchData()
   }
 
-  function addImage() {
-    if (imageInput.trim()) {
-      setForm({ ...form, images: [...form.images, imageInput.trim()] })
-      setImageInput('')
+  // ── Image upload handler ──────────────────────────────────
+  async function handleFileUpload(e) {
+    const files = Array.from(e.target.files)
+    if (files.length === 0) return
+
+    setUploading(true)
+    const uploadedNames = []
+
+    for (const file of files) {
+      const fileName = await uploadImage(file, 'products')
+      if (fileName) uploadedNames.push(fileName)
     }
+
+    setForm(prev => ({ ...prev, images: [...prev.images, ...uploadedNames] }))
+    setUploading(false)
+    // Reset file input so the same file can be selected again
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  async function removeImage(index) {
+    const img = form.images[index]
+    await deleteImage(img)                              // remove from bucket (no-op for URLs/local)
+    setForm(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }))
   }
 
   function toggleSize(size) {
@@ -97,7 +115,11 @@ export default function AdminProducts() {
           <tbody>
             {products.map(p => (
               <tr key={p.id} className={!p.is_visible ? 'opacity-50' : ''}>
-                <td><div className="w-12 h-12 bg-gray-100 overflow-hidden"><img src={p.images?.[0] ? (p.images[0].startsWith('http') ? p.images[0] : `/gallary/${p.images[0]}`) : '/gallary/images.jpg'} alt="" className="w-full h-full object-cover" /></div></td>
+                <td>
+                  <div className="w-12 h-12 bg-gray-100 overflow-hidden rounded">
+                    <img src={getImageUrl(p.images?.[0])} alt="" className="w-full h-full object-cover" />
+                  </div>
+                </td>
                 <td className="font-medium">{p.name}</td>
                 <td className="text-gray-500">{p.categories?.name || '—'}</td>
                 <td>${Number(p.price).toFixed(2)}</td>
@@ -140,12 +162,57 @@ export default function AdminProducts() {
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_new} onChange={e => setForm({...form, is_new: e.target.checked})} className="accent-black" /> New Arrival</label>
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_sale} onChange={e => setForm({...form, is_sale: e.target.checked})} className="accent-black" /> On Sale</label>
               </div>
+
+              {/* ── Image Upload Section ── */}
               <div>
-                <label className="block text-xs font-semibold tracking-wider mb-1">IMAGES (filenames from gallery)</label>
-                <div className="flex gap-2"><input value={imageInput} onChange={e => setImageInput(e.target.value)} className="admin-input" placeholder="e.g. images.jpg" /><button type="button" onClick={addImage} className="admin-btn shrink-0">Add</button></div>
-                <div className="flex gap-2 mt-2 flex-wrap">{form.images.map((img, i) => <span key={i} className="text-xs bg-gray-100 px-2 py-1 rounded flex items-center gap-1">{img}<button onClick={() => setForm({...form, images: form.images.filter((_, j) => j !== i)})}><X size={12} /></button></span>)}</div>
+                <label className="block text-xs font-semibold tracking-wider mb-2">PRODUCT IMAGES</label>
+
+                {/* Upload button */}
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-black transition-colors"
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                  {uploading ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-xs text-gray-500">Uploading…</span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <Upload size={24} className="text-gray-400" />
+                      <span className="text-xs text-gray-500">Click to upload images</span>
+                      <span className="text-[10px] text-gray-400">PNG, JPG, AVIF, WEBP — max 5 MB each</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Preview thumbnails */}
+                {form.images.length > 0 && (
+                  <div className="grid grid-cols-4 gap-3 mt-3">
+                    {form.images.map((img, i) => (
+                      <div key={i} className="relative group aspect-square bg-gray-100 rounded overflow-hidden">
+                        <img src={getImageUrl(img)} alt="" className="w-full h-full object-cover" />
+                        <button
+                          onClick={() => removeImage(i)}
+                          className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <button onClick={handleSave} disabled={saving} className="w-full admin-btn py-3">{saving ? 'SAVING...' : 'SAVE PRODUCT'}</button>
+
+              <button onClick={handleSave} disabled={saving || uploading} className="w-full admin-btn py-3">{saving ? 'SAVING...' : 'SAVE PRODUCT'}</button>
             </div>
           </div>
         </div>
