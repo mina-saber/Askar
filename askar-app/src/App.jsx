@@ -10,6 +10,8 @@ import ShopPage from './pages/customer/ShopPage'
 import NewArrivalsPage from './pages/customer/NewArrivalsPage'
 import OffersPage from './pages/customer/OffersPage'
 import ContactPage from './pages/customer/ContactPage'
+import ProductDetailPage from './pages/customer/ProductDetailPage'
+import CartPage from './pages/customer/CartPage'
 
 // Admin Pages
 import AdminLogin from './pages/admin/AdminLogin'
@@ -29,9 +31,14 @@ export default function App() {
             {/* Customer Routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/shop" element={<ShopPage />} />
+            <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/new-arrivals" element={<NewArrivalsPage />} />
             <Route path="/offers" element={<OffersPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            
+            {/* Fallback Route */}
+            <Route path="*" element={<HomePage />} />
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLogin />} />

@@ -13,41 +13,50 @@ export default function NewArrivalsPage() {
   }, [])
 
   async function fetchNewArrivals() {
-    setLoading(true)
-    const { data, error } = await supabase
-      .from('products')
-      .select('*, categories(name)')
-      .eq('is_visible', true)
-      .eq('is_new', true)
-      .order('created_at', { ascending: false })
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('products')
+        .select('*, categories(name)')
+        .eq('is_visible', true)
+        .eq('is_new', true)
+        .order('created_at', { ascending: false })
 
-    if (data) setProducts(data)
-    setLoading(false)
+      if (error) {
+        console.error("Error fetching new arrivals:", error)
+      } else if (data) {
+        setProducts(data)
+      }
+    } catch (err) {
+      console.error("Exception fetching new arrivals:", err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
+      <div className="h-20 w-full"></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-10">
-          <h1 className="section-title">NEW ARRIVALS</h1>
-          <p className="text-gray-500 text-sm mt-3">
-            The latest additions to our collection.
-          </p>
-          <div className="w-full h-px bg-gray-200 mt-6"></div>
+      <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-zinc-200 pb-8">
+          <div>
+            <h1 className="text-4xl font-black uppercase tracking-widest mb-2">NEW ARRIVALS</h1>
+            <p className="text-zinc-500 text-sm font-medium">The latest additions to our collection.</p>
+          </div>
         </div>
 
         {loading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : products.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-gray-500 text-sm">No new arrivals at the moment. Check back soon!</p>
+          <div className="text-center py-20 bg-zinc-50 rounded-2xl">
+            <p className="text-zinc-500 text-sm font-medium uppercase tracking-widest">No new arrivals at the moment. Check back soon!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
             {products.map(product => (
               <ProductCard key={product.id} product={product} />
             ))}

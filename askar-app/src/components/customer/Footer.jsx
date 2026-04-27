@@ -1,117 +1,73 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 export default function Footer() {
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState('');
 
   const handleSubscribe = (e) => {
-    e.preventDefault()
-    alert('Thank you for subscribing!')
-    setEmail('')
-  }
+    e.preventDefault();
+    alert('Thank you for subscribing!');
+    setEmail('');
+  };
 
   return (
-    <footer className="bg-black text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Brand */}
-          <div>
-            <h3 className="text-2xl font-black tracking-[0.2em] mb-4">ASKAR</h3>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Premium clothing brand delivering exceptional quality and timeless style. 
-              Elevate your wardrobe with our curated collections.
+    <footer className="bg-black text-white pt-20 pb-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+          <div className="md:col-span-1">
+            <h3 className="text-2xl font-black tracking-[0.2em] uppercase mb-6 text-white">ASKAR</h3>
+            <p className="text-zinc-400 text-sm leading-relaxed mb-6">
+              Redefining modern luxury with impeccable craftsmanship and timeless design. Experience the pinnacle of elegance.
             </p>
           </div>
-
-          {/* Shop Links */}
+          
           <div>
-            <h4 className="text-xs font-bold tracking-[0.2em] mb-6">SHOP</h4>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/shop" className="text-gray-400 text-sm hover:text-white transition-colors">
-                  All Products
-                </Link>
-              </li>
-              <li>
-                <Link to="/new-arrivals" className="text-gray-400 text-sm hover:text-white transition-colors">
-                  New Arrivals
-                </Link>
-              </li>
-              <li>
-                <Link to="/offers" className="text-gray-400 text-sm hover:text-white transition-colors">
-                  Offers
-                </Link>
-              </li>
+            <h4 className="text-sm font-bold uppercase tracking-wider mb-6 text-white">Shop</h4>
+            <ul className="space-y-4 text-sm text-zinc-400">
+              <li><Link to="/shop" className="hover:text-rose-500 transition-colors">All Products</Link></li>
+              <li><Link to="/new-arrivals" className="hover:text-rose-500 transition-colors">New Arrivals</Link></li>
+              <li><Link to="/offers" className="hover:text-rose-500 transition-colors">Offers</Link></li>
             </ul>
           </div>
 
-          {/* Support Links */}
           <div>
-            <h4 className="text-xs font-bold tracking-[0.2em] mb-6">SUPPORT</h4>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/contact" className="text-gray-400 text-sm hover:text-white transition-colors">
-                  Contact Us
-                </Link>
-              </li>
-              <li>
-                <span className="text-gray-400 text-sm cursor-default">Shipping & Returns</span>
-              </li>
-              <li>
-                <span className="text-gray-400 text-sm cursor-default">Size Guide</span>
-              </li>
-              <li>
-                <span className="text-gray-400 text-sm cursor-default">FAQ</span>
-              </li>
+            <h4 className="text-sm font-bold uppercase tracking-wider mb-6 text-white">Support</h4>
+            <ul className="space-y-4 text-sm text-zinc-400">
+              <li><Link to="/contact" className="hover:text-rose-500 transition-colors">Contact Us</Link></li>
+              <li><Link to="/contact" className="hover:text-rose-500 transition-colors">Shipping & Returns</Link></li>
+              <li><Link to="/contact" className="hover:text-rose-500 transition-colors">Size Guide</Link></li>
+              <li><Link to="/contact" className="hover:text-rose-500 transition-colors">FAQ</Link></li>
             </ul>
           </div>
 
-          {/* Newsletter */}
           <div>
-            <h4 className="text-xs font-bold tracking-[0.2em] mb-6">NEWSLETTER</h4>
-            <p className="text-gray-400 text-sm mb-4">
-              Subscribe for exclusive updates and offers.
-            </p>
-            <form onSubmit={handleSubscribe} className="flex">
-              <input
-                type="email"
+            <h4 className="text-sm font-bold uppercase tracking-wider mb-6 text-white">Newsletter</h4>
+            <p className="text-zinc-400 text-sm mb-4">Subscribe to receive updates, access to exclusive deals, and more.</p>
+            <form onSubmit={handleSubscribe} className="flex border-b border-zinc-700 pb-2 focus-within:border-rose-500 transition-colors">
+              <input 
+                type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Your email"
+                placeholder="Enter your email" 
                 required
-                className="flex-1 px-4 py-3 bg-white/10 text-white text-sm placeholder-gray-500 border border-white/20 focus:outline-none focus:border-white/50 transition-colors"
+                className="bg-transparent border-none outline-none text-sm w-full text-white placeholder-zinc-500 focus:ring-0 px-0"
               />
-              <button
-                type="submit"
-                className="px-4 py-3 bg-white text-black hover:bg-gray-200 transition-colors"
-              >
-                <ArrowRight size={16} />
+              <button type="submit" className="text-sm uppercase tracking-wider font-bold hover:text-rose-500 transition-colors">
+                Subscribe
               </button>
             </form>
           </div>
         </div>
-      </div>
-
-      {/* Bottom Bar */}
-      <div className="border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-gray-500 text-xs tracking-wider">
-            © {new Date().getFullYear()} ASKAR. ALL RIGHTS RESERVED.
-          </p>
-          <div className="flex items-center gap-6">
-            <a href="#" className="text-gray-500 hover:text-white transition-colors text-xs tracking-[0.15em]">
-              INSTAGRAM
-            </a>
-            <a href="#" className="text-gray-500 hover:text-white transition-colors text-xs tracking-[0.15em]">
-              FACEBOOK
-            </a>
-            <a href="#" className="text-gray-500 hover:text-white transition-colors text-xs tracking-[0.15em]">
-              TWITTER
-            </a>
+        
+        <div className="border-t border-zinc-800 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-zinc-500 uppercase tracking-wider">
+          <p>&copy; {new Date().getFullYear()} ASKAR OFFICIAL. All Rights Reserved.</p>
+          <div className="flex space-x-6 mt-4 md:mt-0">
+            <a href="https://instagram.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Instagram</a>
+            <a href="https://facebook.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Facebook</a>
+            <a href="https://twitter.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Twitter</a>
           </div>
         </div>
       </div>
     </footer>
-  )
+  );
 }
