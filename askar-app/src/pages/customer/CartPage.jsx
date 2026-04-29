@@ -2,18 +2,18 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { getImageUrl } from '../../lib/supabase';
 import Navbar from '../../components/customer/Navbar';
 import Footer from '../../components/customer/Footer';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function CartPage() {
   const { cartItems, removeFromCart, addToCart, clearCart } = useCart();
+  const { t, lang } = useLanguage();
   const navigate = useNavigate();
 
   const handleQuantityChange = (item, delta) => {
     if (item.quantity + delta > 0) {
-      // addToCart with negative quantity or positive handles the logic in context, wait, 
-      // Context uses: return prev.map(item => ... ? { ...item, quantity: item.quantity + quantity } : item)
-      // So delta works perfectly!
       addToCart(item.product, item.size, item.color, delta);
     }
   };
@@ -28,22 +28,22 @@ export default function CartPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col">
+    <div className="min-h-screen bg-zinc-50 flex flex-col" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       <Navbar />
       <div className="h-20 w-full bg-white"></div>
       
       <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
         <div className="mb-12">
-          <h1 className="text-4xl font-black uppercase tracking-widest mb-2">Shopping Bag</h1>
-          <p className="text-zinc-500 text-sm font-medium">{cartItems.length} {cartItems.length === 1 ? 'Item' : 'Items'} in your bag</p>
+          <h1 className="text-4xl font-black uppercase tracking-widest mb-2">{t('shoppingBag')}</h1>
+          <p className="text-zinc-500 text-sm font-medium">{cartItems.length} {t('itemsInBag')}</p>
         </div>
 
         {cartItems.length === 0 ? (
           <div className="text-center py-24 bg-white rounded-2xl border border-zinc-100 shadow-sm">
-            <h2 className="text-2xl font-black uppercase tracking-widest text-zinc-900 mb-4">Your bag is empty</h2>
-            <p className="text-zinc-500 text-sm mb-8">Looks like you haven't added anything to your bag yet.</p>
+            <h2 className="text-2xl font-black uppercase tracking-widest text-zinc-900 mb-4">{t('bagEmpty')}</h2>
+            <p className="text-zinc-500 text-sm mb-8">{lang === 'ar' ? 'يبدو أنك لم تضف أي منتج إلى حقيبتك بعد.' : 'Looks like you haven\'t added anything to your bag yet.'}</p>
             <Link to="/shop" className="inline-block bg-black text-white px-10 py-4 uppercase tracking-widest text-sm font-black hover:bg-rose-600 transition-colors rounded-full shadow-md">
-              Start Shopping
+              {t('startShopping')}
             </Link>
           </div>
         ) : (
@@ -54,33 +54,34 @@ export default function CartPage() {
                 const product = item.product;
                 const price = Number(product.sale_price || product.price);
                 const categoryName = product.categories?.name || product.category || '';
+                const image = getImageUrl(product.images?.[0]);
                 
                 return (
                   <div key={`${product.id}-${item.size}-${item.color}-${index}`} className="flex flex-col sm:flex-row bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm relative">
-                    <Link to={`/product/${product.id}`} className="w-full sm:w-32 h-40 flex-shrink-0 bg-zinc-100 rounded-lg overflow-hidden mb-4 sm:mb-0 sm:mr-6">
-                      <img src={item.image} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                    <Link to={`/product/${product.id}`} className={`w-full sm:w-32 h-40 flex-shrink-0 bg-zinc-100 rounded-lg overflow-hidden mb-4 sm:mb-0 ${lang === 'ar' ? 'sm:ml-6' : 'sm:mr-6'}`}>
+                      <img src={image} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
                     </Link>
                     
                     <div className="flex-grow flex flex-col justify-between">
-                      <div className="flex justify-between items-start pr-8">
+                      <div className={`flex justify-between items-start ${lang === 'ar' ? 'pl-8' : 'pr-8'}`}>
                         <div>
                           <p className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] font-medium mb-1">{categoryName}</p>
                           <Link to={`/product/${product.id}`}>
                             <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-900 hover:text-rose-600 transition-colors mb-2 line-clamp-1">{product.name}</h3>
                           </Link>
                           
-                          <div className="flex flex-wrap gap-4 text-xs text-zinc-500 font-medium">
-                            {item.size && <p>Size: <span className="text-zinc-900 font-bold">{item.size}</span></p>}
+                          <div className={`flex flex-wrap gap-4 text-xs text-zinc-500 font-medium ${lang === 'ar' ? 'space-x-reverse' : ''}`}>
+                            {item.size && <p>{t('size')}: <span className="text-zinc-900 font-bold">{item.size}</span></p>}
                             {item.color && (
                               <div className="flex items-center">
-                                Color: <div className="w-4 h-4 rounded-full border border-zinc-300 ml-2" style={{ backgroundColor: item.color }}></div>
+                                {t('color')}: <div className={`w-4 h-4 rounded-full border border-zinc-300 ${lang === 'ar' ? 'mr-2' : 'ml-2'}`} style={{ backgroundColor: item.color }}></div>
                               </div>
                             )}
                           </div>
                         </div>
                         <button 
                           onClick={() => removeFromCart(product.id, item.size, item.color)}
-                          className="absolute top-6 right-6 text-zinc-400 hover:text-rose-600 transition-colors"
+                          className={`absolute top-6 ${lang === 'ar' ? 'left-6' : 'right-6'} text-zinc-400 hover:text-rose-600 transition-colors`}
                         >
                           <Trash2 size={18} />
                         </button>
@@ -96,7 +97,7 @@ export default function CartPage() {
                             <Plus size={14} />
                           </button>
                         </div>
-                        <span className="text-lg font-black text-zinc-900">${(price * item.quantity).toFixed(2)}</span>
+                        <span className="text-lg font-black text-zinc-900">{(price * item.quantity).toFixed(2)} {lang === 'ar' ? 'ج.م' : 'EGP'}</span>
                       </div>
                     </div>
                   </div>
@@ -108,7 +109,7 @@ export default function CartPage() {
                   onClick={clearCart}
                   className="text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-rose-600 transition-colors border-b border-transparent hover:border-rose-600 pb-1"
                 >
-                  Clear Bag
+                  {t('clearBag')}
                 </button>
               </div>
             </div>
@@ -116,34 +117,34 @@ export default function CartPage() {
             {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="bg-white p-8 rounded-2xl border border-zinc-100 shadow-sm sticky top-28">
-                <h2 className="text-lg font-black uppercase tracking-widest mb-6 border-b border-zinc-100 pb-4">Order Summary</h2>
+                <h2 className="text-lg font-black uppercase tracking-widest mb-6 border-b border-zinc-100 pb-4">{t('orderSummary')}</h2>
                 
                 <div className="space-y-4 mb-6 text-sm font-medium text-zinc-600">
                   <div className="flex justify-between">
-                    <span>Subtotal</span>
-                    <span className="text-zinc-900 font-bold">${calculateSubtotal().toFixed(2)}</span>
+                    <span>{t('subtotal')}</span>
+                    <span className="text-zinc-900 font-bold">{calculateSubtotal().toFixed(2)} {lang === 'ar' ? 'ج.م' : 'EGP'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Shipping</span>
-                    <span>Calculated at checkout</span>
+                    <span>{t('shipping')}</span>
+                    <span>{t('calculatedAtCheckout')}</span>
                   </div>
                 </div>
                 
                 <div className="border-t border-zinc-100 pt-6 mb-8 flex justify-between items-center">
-                  <span className="text-sm font-black uppercase tracking-widest">Total</span>
-                  <span className="text-2xl font-black text-rose-600">${calculateSubtotal().toFixed(2)}</span>
+                  <span className="text-sm font-black uppercase tracking-widest">{t('total')}</span>
+                  <span className="text-2xl font-black text-rose-600">{calculateSubtotal().toFixed(2)} {lang === 'ar' ? 'ج.م' : 'EGP'}</span>
                 </div>
                 
                 <button 
                   onClick={handleCheckout}
                   className="w-full bg-black text-white py-4 text-sm font-black uppercase tracking-widest hover:bg-rose-600 transition-colors rounded-full shadow-lg flex justify-center items-center"
                 >
-                  Checkout <ArrowRight size={16} className="ml-2" />
+                  {t('checkout')} <ArrowRight size={16} className={lang === 'ar' ? 'mr-2 transform rotate-180' : 'ml-2'} />
                 </button>
                 
                 <div className="mt-6 text-center">
                   <Link to="/shop" className="text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-colors">
-                    Continue Shopping
+                    {t('continueShopping')}
                   </Link>
                 </div>
               </div>

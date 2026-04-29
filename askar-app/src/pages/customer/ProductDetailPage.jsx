@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ChevronRight, Heart, Share2, Ruler, MessageCircle, PhoneCall, Check } from "lucide-react";
+import { ChevronRight, Heart, Share2, Ruler, MessageCircle, PhoneCall, Check, ChevronLeft } from "lucide-react";
 import { supabase, getImageUrl } from '../../lib/supabase';
 import { useCart } from '../../context/CartContext';
 import Navbar from '../../components/customer/Navbar';
 import Footer from '../../components/customer/Footer';
 import ProductCard from '../../components/customer/ProductCard';
+import ShareModal from '../../components/customer/ShareModal';
+import { useLanguage } from '../../context/LanguageContext';
+import { useToast } from '../../context/ToastContext';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { t, lang } = useLanguage();
+  const { addToast } = useToast();
   
   const [product, setProduct] = useState(null);
   const [similarProducts, setSimilarProducts] = useState([]);
@@ -20,6 +25,8 @@ export default function ProductDetailPage() {
   const [selectedColor, setSelectedColor] = useState('');
   const [activeImage, setActiveImage] = useState('');
   const [settings, setSettings] = useState(null);
+  
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   useEffect(() => {
     fetchProductAndSettings();
@@ -78,25 +85,21 @@ export default function ProductDetailPage() {
     if (!product) return;
     
     if (product.sizes?.length > 0 && !selectedSize) {
-      alert("Please select a size");
+      addToast(t('selectSizePrompt'), 'error');
       return;
     }
     
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.sale_price || product.price,
-      image: activeImage,
-      size: selectedSize,
-      color: selectedColor
-    });
+    addToCart(product, selectedSize, selectedColor);
     
-    alert("Added to cart successfully!");
+    addToast(t('addedToCart'), 'success');
   };
 
   const handleWhatsApp = () => {
     const phone = settings?.whatsapp_primary || settings?.phone || "";
-    if (!phone) return alert("Contact number not available");
+    if (!phone) {
+      addToast('Contact number not available', 'error');
+      return;
+    }
     
     const message = `Hi ASKAR, I'm interested in ordering: ${product?.name} (Size: ${selectedSize || 'N/A'}${selectedColor ? `, Color: ${selectedColor}` : ''}).`;
     window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
@@ -104,7 +107,7 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex flex-col">
+      <div className="min-h-screen bg-white flex flex-col" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <Navbar />
         <div className="flex-grow flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></div>
@@ -122,17 +125,17 @@ export default function ProductDetailPage() {
   const imageList = product.images || [];
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       <Navbar />
       <div className="h-20 w-full"></div>
 
       <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
         {/* Breadcrumbs */}
-        <nav className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-12">
-          <Link to="/" className="hover:text-rose-600 transition-colors">Home</Link>
-          <ChevronRight size={12} />
-          <Link to="/shop" className="hover:text-rose-600 transition-colors">Shop</Link>
-          <ChevronRight size={12} />
+        <nav className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-12 rtl:space-x-reverse">
+          <Link to="/" className="hover:text-rose-600 transition-colors">{t('home')}</Link>
+          {lang === 'ar' ? <ChevronLeft size={12} /> : <ChevronRight size={12} />}
+          <Link to="/shop" className="hover:text-rose-600 transition-colors">{t('shop')}</Link>
+          {lang === 'ar' ? <ChevronLeft size={12} /> : <ChevronRight size={12} />}
           <span className="text-zinc-900 line-clamp-1">{product.name}</span>
         </nav>
 
@@ -147,8 +150,8 @@ export default function ProductDetailPage() {
                 className="w-full h-full object-cover"
               />
               {product.is_new && (
-                <div className="absolute top-4 left-4 bg-rose-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full z-10">
-                  New
+                <div className={`absolute top-4 ${lang === 'ar' ? 'right-4' : 'left-4'} bg-rose-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full z-10`}>
+                  {t('new')}
                 </div>
               )}
             </div>
@@ -183,30 +186,30 @@ export default function ProductDetailPage() {
               </button>
             </div>
             
-            <div className="flex items-center space-x-4 mb-8 pb-8 border-b border-zinc-200">
+            <div className={`flex items-center space-x-4 mb-8 pb-8 border-b border-zinc-200 ${lang === 'ar' ? 'rtl:space-x-reverse' : ''}`}>
                {salePrice ? (
                  <>
-                   <span className="text-3xl font-black text-rose-600">${salePrice}</span>
-                   <span className="text-xl font-bold text-zinc-400 line-through">${price}</span>
+                   <span className="text-3xl font-black text-rose-600">{salePrice} {lang === 'ar' ? 'ج.م' : 'EGP'}</span>
+                   <span className="text-xl font-bold text-zinc-400 line-through">{price} {lang === 'ar' ? 'ج.م' : 'EGP'}</span>
                    {product.discount_percentage && (
-                     <span className="bg-rose-50 text-rose-600 px-3 py-1 text-xs font-black uppercase tracking-widest ml-4 rounded-full">
+                     <span className={`bg-rose-50 text-rose-600 px-3 py-1 text-xs font-black uppercase tracking-widest rounded-full ${lang === 'ar' ? 'mr-4' : 'ml-4'}`}>
                        -{Math.round(product.discount_percentage)}%
                      </span>
                    )}
                  </>
                ) : (
-                 <span className="text-3xl font-black text-zinc-900">${price}</span>
+                 <span className="text-3xl font-black text-zinc-900">{price} {lang === 'ar' ? 'ج.م' : 'EGP'}</span>
                )}
             </div>
 
             <p className="text-zinc-600 text-sm leading-relaxed mb-10 font-medium">
-              {product.description || "Experience the perfect blend of modern streetwear and luxury with this premium piece from ASKAR. Crafted with meticulous attention to detail and high-quality materials to ensure both comfort and durability."}
+              {product.description || (lang === 'ar' ? "جرب المزيج المثالي بين أزياء الشارع العصرية والفخامة مع هذه القطعة الفاخرة من عسكر. مصنوعة باهتمام دقيق بالتفاصيل ومواد عالية الجودة لضمان الراحة والمتانة معاً." : "Experience the perfect blend of modern streetwear and luxury with this premium piece from ASKAR. Crafted with meticulous attention to detail and high-quality materials to ensure both comfort and durability.")}
             </p>
 
             {/* Color Selection */}
             {product.colors && product.colors.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-900 mb-4">Color</h3>
+                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-900 mb-4">{t('color')}</h3>
                 <div className="flex flex-wrap gap-4">
                   {product.colors.map(color => (
                     <button
@@ -229,9 +232,9 @@ export default function ProductDetailPage() {
             {product.sizes && product.sizes.length > 0 && (
               <div className="mb-12">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xs font-black uppercase tracking-widest text-zinc-900">Size</h3>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-zinc-900">{t('size')}</h3>
                   <button className="flex items-center text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-rose-600 transition-colors">
-                    <Ruler size={14} className="mr-2" /> Size Guide
+                    <Ruler size={14} className={lang === 'ar' ? 'ml-2' : 'mr-2'} /> {t('sizeGuide')}
                   </button>
                 </div>
                 <div className="grid grid-cols-4 gap-3">
@@ -263,7 +266,7 @@ export default function ProductDetailPage() {
                     : 'bg-black text-white hover:bg-rose-600'
                 }`}
               >
-                {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Bag'}
+                {product.stock_quantity === 0 ? t('outOfStock') : t('addToBag')}
               </button>
               
               <div className="grid grid-cols-2 gap-4">
@@ -271,25 +274,25 @@ export default function ProductDetailPage() {
                   onClick={handleWhatsApp}
                   className="w-full bg-[#25D366] text-white py-4 text-xs font-black uppercase tracking-widest hover:bg-[#1DA851] transition-colors duration-300 flex items-center justify-center rounded-full"
                 >
-                  <MessageCircle size={16} className="mr-2" /> Order via WhatsApp
+                  <MessageCircle size={16} className={lang === 'ar' ? 'ml-2' : 'mr-2'} /> {t('orderViaWhatsApp')}
                 </button>
                 <a 
                   href={`tel:${settings?.phone || ''}`}
                   className="w-full border-2 border-black text-black py-4 text-xs font-black uppercase tracking-widest hover:bg-zinc-100 transition-colors duration-300 flex items-center justify-center rounded-full"
                 >
-                  <PhoneCall size={16} className="mr-2" /> Call Now
+                  <PhoneCall size={16} className={lang === 'ar' ? 'ml-2' : 'mr-2'} /> {t('callNow')}
                 </a>
               </div>
             </div>
 
             {/* Additional Info */}
             <div className="border-t border-zinc-200 pt-8">
-              <div className="flex items-center space-x-6 text-xs font-bold uppercase tracking-widest text-zinc-500">
+              <div className={`flex items-center space-x-6 text-xs font-bold uppercase tracking-widest text-zinc-500 ${lang === 'ar' ? 'rtl:space-x-reverse' : ''}`}>
                  <button className="flex items-center hover:text-rose-600 transition-colors">
-                   <Heart size={16} className="mr-2" /> Add to Wishlist
+                   <Heart size={16} className={lang === 'ar' ? 'ml-2' : 'mr-2'} /> {t('addToWishlist')}
                  </button>
-                 <button className="flex items-center hover:text-rose-600 transition-colors">
-                   <Share2 size={16} className="mr-2" /> Share
+                 <button onClick={() => setIsShareModalOpen(true)} className="flex items-center hover:text-rose-600 transition-colors">
+                   <Share2 size={16} className={lang === 'ar' ? 'ml-2' : 'mr-2'} /> {t('share')}
                  </button>
               </div>
             </div>
@@ -299,7 +302,7 @@ export default function ProductDetailPage() {
         {/* Similar Products */}
         {similarProducts.length > 0 && (
           <section className="pt-24 border-t border-zinc-200">
-             <h2 className="text-3xl font-black uppercase tracking-widest text-center mb-16">You May Also Like</h2>
+             <h2 className="text-3xl font-black uppercase tracking-widest text-center mb-16">{t('youMayAlsoLike')}</h2>
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 {similarProducts.map((p) => (
                   <ProductCard key={p.id} product={p} />
@@ -310,6 +313,7 @@ export default function ProductDetailPage() {
       </div>
 
       <Footer />
+      <ShareModal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} />
     </div>
   );
 }
