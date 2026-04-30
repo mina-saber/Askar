@@ -23,8 +23,11 @@ export default function CartPage() {
   };
 
   const handleCheckout = () => {
-    // Basic checkout function, you can implement a checkout page later.
-    alert("Proceeding to checkout...");
+    if (cartItems.length === 0) return;
+    const itemsText = cartItems.map(item => `- ${item.product.name} (${item.quantity}x) Size: ${item.size || 'N/A'}, Color: ${item.color || 'N/A'}`).join('%0A');
+    const total = calculateSubtotal().toFixed(2);
+    const message = `Hello ASKAR,%0AI would like to order the following items:%0A${itemsText}%0A%0ATotal: ${total} EGP`;
+    window.open(`https://wa.me/201070425411?text=${message}`, '_blank');
   };
 
   return (

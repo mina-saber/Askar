@@ -70,7 +70,8 @@ export default function HomePage() {
           autoPlay 
           loop 
           muted 
-          playsInline 
+          playsInline={true}
+          webkit-playsinline="true"
           className="absolute inset-0 w-full h-full object-cover scale-105"
         >
           <source src={heroVideo} type="video/mp4" />
@@ -87,7 +88,7 @@ export default function HomePage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="max-w-3xl"
           >
-            <h1 className="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-6 whitespace-pre-line">
+            <h1 className={`text-5xl sm:text-7xl lg:text-8xl xl:text-9xl font-black text-white uppercase mb-6 whitespace-pre-line ${lang === 'ar' ? 'leading-[1.2] tracking-normal font-cairo' : 'leading-[0.9] tracking-tighter'}`}>
               {t('streetIsYourRunway')}
             </h1>
             <p className="text-zinc-300 text-lg md:text-xl lg:text-2xl mb-10 font-light tracking-wide max-w-xl">
