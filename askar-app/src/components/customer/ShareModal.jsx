@@ -23,22 +23,23 @@ export default function ShareModal({ isOpen, onClose }) {
   const encodedUrl = encodeURIComponent(url);
 
   const handleSocialShare = (platform) => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'ASKAR',
-        url: url
-      }).catch(console.error);
-    } else {
-      if (platform === 'messenger') {
+    if (platform === 'messenger') {
+      window.open(`fb-messenger://share/?link=${encodedUrl}`, '_blank');
+      // Fallback for desktop:
+      setTimeout(() => {
         window.open(`http://www.facebook.com/dialog/send?link=${encodedUrl}&app_id=291494419107518&redirect_uri=${encodedUrl}`, '_blank');
-      } else if (platform === 'twitter') {
-        window.open(`https://twitter.com/intent/tweet?url=${encodedUrl}`, '_blank');
-      } else if (platform === 'whatsapp') {
-        window.open(`https://wa.me/?text=${encodedUrl}`, '_blank');
-      } else if (platform === 'instagram') {
-        handleCopy();
-        alert(lang === 'ar' ? 'تم نسخ الرابط! يمكنك الآن لصقه في رسائل انستجرام.' : 'Link copied! You can now paste it in Instagram direct messages.');
-      }
+      }, 500);
+    } else if (platform === 'twitter') {
+      window.open(`https://twitter.com/intent/tweet?url=${encodedUrl}`, '_blank');
+    } else if (platform === 'whatsapp') {
+      window.open(`https://wa.me/?text=${encodedUrl}`, '_blank');
+    } else if (platform === 'instagram') {
+      handleCopy();
+      alert(lang === 'ar' ? 'تم نسخ الرابط! سيتم فتح الانستجرام الآن لتتمكن من لصقه في رسائل أي شخص.' : 'Link copied! Instagram will now open so you can paste and send it.');
+      window.location.href = 'instagram://direct';
+      setTimeout(() => {
+        window.open('https://www.instagram.com/direct/inbox/', '_blank');
+      }, 1000);
     }
   };
 
