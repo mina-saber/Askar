@@ -95,14 +95,9 @@ export default function ProductDetailPage() {
   };
 
   const handleWhatsApp = () => {
-    const phone = settings?.whatsapp_primary || settings?.phone || "";
-    if (!phone) {
-      addToast('Contact number not available', 'error');
-      return;
-    }
-    
-    const message = `Hi ASKAR, I'm interested in ordering: ${product?.name} (Size: ${selectedSize || 'N/A'}${selectedColor ? `, Color: ${selectedColor}` : ''}).`;
-    window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
+    const phone = "201070425411";
+    const message = `مرحباً عسكر، أود طلب: ${product?.name} (المقاس: ${selectedSize || 'غير محدد'}${selectedColor ? `، اللون: ${selectedColor}` : ''}).`;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   if (loading) {
@@ -277,7 +272,7 @@ export default function ProductDetailPage() {
                   <MessageCircle size={16} className={lang === 'ar' ? 'ml-2' : 'mr-2'} /> {t('orderViaWhatsApp')}
                 </button>
                 <a 
-                  href={`tel:${settings?.phone || ''}`}
+                  href={`tel:+201070425411`}
                   className="w-full border-2 border-black text-black py-4 text-xs font-black uppercase tracking-widest hover:bg-zinc-100 transition-colors duration-300 flex items-center justify-center rounded-full"
                 >
                   <PhoneCall size={16} className={lang === 'ar' ? 'ml-2' : 'mr-2'} /> {t('callNow')}

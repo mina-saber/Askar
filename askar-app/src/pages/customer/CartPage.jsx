@@ -24,10 +24,10 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     if (cartItems.length === 0) return;
-    const itemsText = cartItems.map(item => `- ${item.product.name} (${item.quantity}x) Size: ${item.size || 'N/A'}, Color: ${item.color || 'N/A'}`).join('%0A');
+    const itemsText = cartItems.map(item => `- ${item.product.name} (الكمية: ${item.quantity}) المقاس: ${item.size || 'غير محدد'}، اللون: ${item.color || 'غير محدد'}`).join('\n');
     const total = calculateSubtotal().toFixed(2);
-    const message = `Hello ASKAR,%0AI would like to order the following items:%0A${itemsText}%0A%0ATotal: ${total} EGP`;
-    window.open(`https://wa.me/201070425411?text=${message}`, '_blank');
+    const message = `مرحباً عسكر،\nأود طلب المنتجات التالية:\n${itemsText}\n\nالإجمالي: ${total} ج.م`;
+    window.open(`https://wa.me/201070425411?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   return (

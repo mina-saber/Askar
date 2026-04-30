@@ -72,7 +72,10 @@ export default function HomePage() {
           muted 
           playsInline={true}
           webkit-playsinline="true"
+          preload="auto"
+          disablePictureInPicture
           className="absolute inset-0 w-full h-full object-cover scale-105"
+          style={{ willChange: 'transform', transform: 'translateZ(0)' }}
         >
           <source src={heroVideo} type="video/mp4" />
         </video>
