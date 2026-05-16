@@ -15,9 +15,9 @@ export default function AdminLogin() {
   const [isOn, setIsOn] = useState(false)
 
   const handleDragEnd = (event, info) => {
-    // If pulled down far enough, toggle the light
+    // If pulled down far enough, toggle the light on/off
     if (info.offset.y > 30) {
-      setIsOn(true)
+      setIsOn(prev => !prev)
     }
   }
 
