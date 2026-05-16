@@ -153,7 +153,7 @@ export default function AdminLogin() {
                   </motion.div>
                 )}
                 
-                <form onSubmit={handleSubmit} className="space-y-6 relative z-10 mt-6">
+                <form onSubmit={handleSubmit} className="space-y-8 relative z-10 mt-8">
                   <div className="relative">
                     <input 
                       id="email"
@@ -161,14 +161,14 @@ export default function AdminLogin() {
                       required 
                       value={email} 
                       onChange={e => setEmail(e.target.value)} 
-                      className="peer w-full bg-black/40 border border-white/10 rounded-xl px-5 pt-6 pb-2 text-white text-sm outline-none transition-colors duration-300 focus:border-[#D4AF37]" 
+                      className="peer w-full bg-black/40 border border-white/10 rounded-xl px-5 py-4 text-white text-sm outline-none transition-colors duration-300 focus:border-[#D4AF37]" 
                       placeholder=" "
                     />
                     <label 
                       htmlFor="email"
-                      className="absolute left-5 top-4 text-zinc-500 text-xs font-medium tracking-[0.2em] uppercase pointer-events-none transition-all duration-300
-                                 peer-focus:top-2 peer-focus:text-[9px] peer-focus:text-[#D4AF37]
-                                 peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-[9px] peer-[:not(:placeholder-shown)]:text-[#D4AF37]"
+                      className="absolute left-4 top-4 px-2 text-zinc-500 text-xs font-medium tracking-[0.2em] uppercase pointer-events-none transition-all duration-300
+                                 peer-focus:-top-2 peer-focus:text-[9px] peer-focus:text-[#D4AF37] peer-focus:bg-[#1a1a1a] peer-focus:rounded-full
+                                 peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:text-[9px] peer-[:not(:placeholder-shown)]:text-[#D4AF37] peer-[:not(:placeholder-shown)]:bg-[#1a1a1a] peer-[:not(:placeholder-shown)]:rounded-full"
                     >
                       Username
                     </label>
@@ -181,14 +181,14 @@ export default function AdminLogin() {
                       required 
                       value={password} 
                       onChange={e => setPassword(e.target.value)} 
-                      className="peer w-full bg-black/40 border border-white/10 rounded-xl px-5 pt-6 pb-2 text-white text-sm outline-none transition-colors duration-300 focus:border-[#D4AF37]" 
+                      className="peer w-full bg-black/40 border border-white/10 rounded-xl px-5 py-4 text-white text-sm outline-none transition-colors duration-300 focus:border-[#D4AF37]" 
                       placeholder=" "
                     />
                     <label 
                       htmlFor="password"
-                      className="absolute left-5 top-4 text-zinc-500 text-xs font-medium tracking-[0.2em] uppercase pointer-events-none transition-all duration-300
-                                 peer-focus:top-2 peer-focus:text-[9px] peer-focus:text-[#D4AF37]
-                                 peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-[9px] peer-[:not(:placeholder-shown)]:text-[#D4AF37]"
+                      className="absolute left-4 top-4 px-2 text-zinc-500 text-xs font-medium tracking-[0.2em] uppercase pointer-events-none transition-all duration-300
+                                 peer-focus:-top-2 peer-focus:text-[9px] peer-focus:text-[#D4AF37] peer-focus:bg-[#1a1a1a] peer-focus:rounded-full
+                                 peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:text-[9px] peer-[:not(:placeholder-shown)]:text-[#D4AF37] peer-[:not(:placeholder-shown)]:bg-[#1a1a1a] peer-[:not(:placeholder-shown)]:rounded-full"
                     >
                       Password
                     </label>
