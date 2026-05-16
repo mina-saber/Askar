@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Instagram, Facebook, Twitter } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 export default function Footer() {
@@ -64,9 +65,15 @@ export default function Footer() {
         <div className="border-t border-zinc-800 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-zinc-500 uppercase tracking-wider">
           <p>&copy; {new Date().getFullYear()} ASKAR OFFICIAL. {t('allRightsReserved')}.</p>
           <div className="flex space-x-6 mt-4 md:mt-0 rtl:space-x-reverse">
-            <a href="https://instagram.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Instagram</a>
-            <a href="https://facebook.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Facebook</a>
-            <a href="https://twitter.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Twitter</a>
+            <a href="https://instagram.com" target="_blank" rel="noreferrer" className="hover:text-rose-500 transition-colors" aria-label="Instagram">
+              <Instagram size={20} />
+            </a>
+            <a href="https://facebook.com" target="_blank" rel="noreferrer" className="hover:text-rose-500 transition-colors" aria-label="Facebook">
+              <Facebook size={20} />
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noreferrer" className="hover:text-rose-500 transition-colors" aria-label="Twitter">
+              <Twitter size={20} />
+            </a>
           </div>
         </div>
       </div>
