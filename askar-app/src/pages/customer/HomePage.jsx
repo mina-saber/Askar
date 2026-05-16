@@ -17,7 +17,7 @@ export default function HomePage() {
   // Default categories to T-shirts and Pants
   const defaultCategories = [
     { name: t('tshirts'), pathName: 'T-Shirts', image_url: '/gallary/images.jpg' },
-    { name: t('pants'), pathName: 'Pants', image_url: '/gallary/images (1).jpg' }
+    { name: t('pants'), pathName: 'Pants', image_url: '/gallary/pants.jpg' }
   ];
 
   useEffect(() => {
