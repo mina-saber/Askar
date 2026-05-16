@@ -24,7 +24,6 @@ export default function ShareModal({ isOpen, onClose }) {
 
   const handleSocialShare = async (platform) => {
     if (platform === 'messenger') {
-      // User specifically requested the Share Menu to open for this icon
       if (navigator.share) {
         try {
           await navigator.share({
@@ -33,9 +32,12 @@ export default function ShareModal({ isOpen, onClose }) {
           });
         } catch (err) {
           console.error('Error sharing:', err);
+          alert(lang === 'ar' 
+            ? 'قائمة المشاركة الذكية تتطلب رابط محمي (https) لكي تظهر على التليفون. سيتم فتح الماسنجر بشكل بديل.' 
+            : 'Native share requires HTTPS on mobile. Opening messenger as fallback.');
+          window.open(`http://www.facebook.com/dialog/send?link=${encodedUrl}&app_id=291494419107518&redirect_uri=${encodedUrl}`, '_blank');
         }
       } else {
-        alert(lang === 'ar' ? 'قائمة المشاركة غير مدعومة في هذا المتصفح.' : 'Share menu is not supported in this browser.');
         window.open(`http://www.facebook.com/dialog/send?link=${encodedUrl}&app_id=291494419107518&redirect_uri=${encodedUrl}`, '_blank');
       }
     } else if (platform === 'twitter') {
