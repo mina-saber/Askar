@@ -153,29 +153,47 @@ export default function AdminLogin() {
                   </motion.div>
                 )}
                 
-                <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
-                  <div className="group">
-                    <label className="block text-[9px] font-medium tracking-[0.2em] mb-2 text-zinc-500 uppercase transition-colors group-focus-within:text-[#E6C875]">Username</label>
+                <form onSubmit={handleSubmit} className="space-y-6 relative z-10 mt-6">
+                  <div className="relative">
                     <input 
+                      id="email"
                       type="email" 
                       required 
                       value={email} 
                       onChange={e => setEmail(e.target.value)} 
-                      className="w-full bg-black/30 border border-white/5 rounded-xl px-5 py-3.5 text-white text-sm focus:outline-none focus:border-[#E6C875]/50 focus:ring-1 focus:ring-[#E6C875]/50 transition-all placeholder:text-zinc-700" 
-                      placeholder="admin@askar.com" 
+                      className="peer w-full bg-black/40 border border-white/10 rounded-xl px-5 pt-6 pb-2 text-white text-sm outline-none transition-colors duration-300 focus:border-[#D4AF37]" 
+                      placeholder=" "
                     />
+                    <label 
+                      htmlFor="email"
+                      className="absolute left-5 top-4 text-zinc-500 text-xs font-medium tracking-[0.2em] uppercase pointer-events-none transition-all duration-300
+                                 peer-focus:top-2 peer-focus:text-[9px] peer-focus:text-[#D4AF37]
+                                 peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-[9px] peer-[:not(:placeholder-shown)]:text-[#D4AF37]"
+                    >
+                      Username
+                    </label>
                   </div>
-                  <div className="group">
-                    <label className="block text-[9px] font-medium tracking-[0.2em] mb-2 text-zinc-500 uppercase transition-colors group-focus-within:text-[#E6C875]">Password</label>
+                  
+                  <div className="relative">
                     <input 
+                      id="password"
                       type="password" 
                       required 
                       value={password} 
                       onChange={e => setPassword(e.target.value)} 
-                      className="w-full bg-black/30 border border-white/5 rounded-xl px-5 py-3.5 text-white text-sm focus:outline-none focus:border-[#E6C875]/50 focus:ring-1 focus:ring-[#E6C875]/50 transition-all placeholder:text-zinc-700" 
-                      placeholder="••••••••" 
+                      className="peer w-full bg-black/40 border border-white/10 rounded-xl px-5 pt-6 pb-2 text-white text-sm outline-none transition-colors duration-300 focus:border-[#D4AF37]" 
+                      placeholder=" "
                     />
+                    <label 
+                      htmlFor="password"
+                      className="absolute left-5 top-4 text-zinc-500 text-xs font-medium tracking-[0.2em] uppercase pointer-events-none transition-all duration-300
+                                 peer-focus:top-2 peer-focus:text-[9px] peer-focus:text-[#D4AF37]
+                                 peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-[9px] peer-[:not(:placeholder-shown)]:text-[#D4AF37]"
+                    >
+                      Password
+                    </label>
                   </div>
+
                   <button 
                     type="submit" 
                     disabled={loading} 
