@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
+import { Trash2, Plus, Minus, ArrowRight, X } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
-import { getImageUrl } from '../../lib/supabase';
+import { supabase, getImageUrl } from '../../lib/supabase';
 import Navbar from '../../components/customer/Navbar';
 import Footer from '../../components/customer/Footer';
 import { useLanguage } from '../../context/LanguageContext';
@@ -11,6 +11,11 @@ export default function CartPage() {
   const { cartItems, removeFromCart, addToCart, clearCart } = useCart();
   const { t, lang } = useLanguage();
   const navigate = useNavigate();
+
+  // Checkout Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [customer, setCustomer] = useState({ name: '', phone: '', address: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleQuantityChange = (item, delta) => {
     if (item.quantity + delta > 0) {
@@ -24,10 +29,54 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     if (cartItems.length === 0) return;
-    const itemsText = cartItems.map(item => `- ${item.product.name} (الكمية: ${item.quantity}) المقاس: ${item.size || 'غير محدد'}، اللون: ${item.color || 'غير محدد'}`).join('\n');
-    const total = calculateSubtotal().toFixed(2);
-    const message = `مرحباً عسكر،\nأود طلب المنتجات التالية:\n${itemsText}\n\nالإجمالي: ${total} ج.م`;
-    window.open(`https://wa.me/201070425411?text=${encodeURIComponent(message)}`, '_blank');
+    // Open the modal instead of going directly to WhatsApp
+    setIsModalOpen(true);
+  };
+
+  const submitOrder = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      // 1. Prepare orders data for insertion
+      const ordersToInsert = cartItems.map(item => ({
+        customer_name: customer.name,
+        phone: customer.phone,
+        product_id: item.product.id,
+        size: item.size || null,
+        color: item.color || null,
+        quantity: item.quantity,
+        notes: customer.address || null,
+        status: 'pending'
+      }));
+
+      // 2. Insert into Supabase
+      const { error } = await supabase.from('orders').insert(ordersToInsert);
+      
+      if (error) {
+        console.error("Supabase Error:", error);
+        throw error;
+      }
+
+      // 3. Prepare WhatsApp message
+      const itemsText = cartItems.map(item => `- ${item.product.name} (الكمية: ${item.quantity}) المقاس: ${item.size || 'غير محدد'}، اللون: ${item.color || 'غير محدد'}`).join('\n');
+      const total = calculateSubtotal().toFixed(2);
+      const message = `مرحباً عسكر،\nأنا ${customer.name}\nأود تأكيد طلبي التالي:\n\n${itemsText}\n\nالعنوان/ملاحظات: ${customer.address}\nرقم الهاتف: ${customer.phone}\nالإجمالي: ${total} ج.م`;
+      
+      // 4. Open WhatsApp
+      window.open(`https://wa.me/201070425411?text=${encodeURIComponent(message)}`, '_blank');
+      
+      // 5. Cleanup
+      setIsModalOpen(false);
+      clearCart();
+      navigate('/shop'); // Redirect to shop or success page
+      
+    } catch (err) {
+      console.error("Error submitting order:", err);
+      alert(lang === 'ar' ? 'حدث خطأ أثناء إرسال الطلب، يرجى المحاولة مرة أخرى.' : 'Error submitting order, please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -35,7 +84,7 @@ export default function CartPage() {
       <Navbar />
       <div className="h-20 w-full bg-white"></div>
       
-      <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
+      <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full relative">
         <div className="mb-12">
           <h1 className="text-4xl font-black uppercase tracking-widest mb-2">{t('shoppingBag')}</h1>
           <p className="text-zinc-500 text-sm font-medium">{cartItems.length} {t('itemsInBag')}</p>
@@ -150,6 +199,75 @@ export default function CartPage() {
                     {t('continueShopping')}
                   </Link>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Checkout Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-fade-in-up">
+              <div className="px-8 py-6 border-b border-zinc-100 flex justify-between items-center">
+                <h3 className="text-xl font-black uppercase tracking-widest">{lang === 'ar' ? 'تفاصيل التوصيل' : 'Delivery Details'}</h3>
+                <button onClick={() => setIsModalOpen(false)} className="text-zinc-400 hover:text-rose-600 transition-colors">
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <div className="p-8">
+                <p className="text-sm text-zinc-500 mb-6 font-medium leading-relaxed">
+                  {lang === 'ar' 
+                    ? 'يرجى إدخال بياناتك حتى نتمكن من تسجيل طلبك في النظام قبل تحويلك لتأكيده عبر الواتساب.' 
+                    : 'Please enter your details so we can register your order before confirming via WhatsApp.'}
+                </p>
+                
+                <form onSubmit={submitOrder} className="space-y-5">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] mb-2 text-zinc-900">{lang === 'ar' ? 'الاسم بالكامل' : 'Full Name'}</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={customer.name} 
+                      onChange={e => setCustomer({...customer, name: e.target.value})} 
+                      className="w-full px-5 py-4 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:border-rose-600 focus:ring-1 focus:ring-rose-600 transition-colors bg-zinc-50" 
+                      placeholder={lang === 'ar' ? 'اكتب اسمك' : 'Enter your name'} 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] mb-2 text-zinc-900">{lang === 'ar' ? 'رقم الهاتف' : 'Phone Number'}</label>
+                    <input 
+                      type="tel" 
+                      required 
+                      value={customer.phone} 
+                      onChange={e => setCustomer({...customer, phone: e.target.value})} 
+                      className="w-full px-5 py-4 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:border-rose-600 focus:ring-1 focus:ring-rose-600 transition-colors bg-zinc-50" 
+                      placeholder="010XXXXXXXX" 
+                      dir="ltr"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] mb-2 text-zinc-900">{lang === 'ar' ? 'العنوان والملاحظات' : 'Address & Notes'}</label>
+                    <textarea 
+                      required
+                      rows={3}
+                      value={customer.address} 
+                      onChange={e => setCustomer({...customer, address: e.target.value})} 
+                      className="w-full px-5 py-4 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:border-rose-600 focus:ring-1 focus:ring-rose-600 transition-colors bg-zinc-50 resize-none" 
+                      placeholder={lang === 'ar' ? 'المحافظة، المنطقة، الشارع، رقم العمارة...' : 'City, Area, Street...'} 
+                    />
+                  </div>
+                  
+                  <button 
+                    type="submit" 
+                    disabled={isSubmitting} 
+                    className="w-full mt-8 bg-black text-white px-8 py-4 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-rose-600 transition-all shadow-md hover:shadow-xl disabled:opacity-70 disabled:hover:bg-black"
+                  >
+                    {isSubmitting 
+                      ? (lang === 'ar' ? 'جاري التسجيل...' : 'Processing...') 
+                      : (lang === 'ar' ? 'تأكيد الطلب' : 'Confirm Order')}
+                  </button>
+                </form>
               </div>
             </div>
           </div>
