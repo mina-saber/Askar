@@ -51,10 +51,17 @@ export default function AdminProducts() {
       description: form.description, sizes: form.sizes, colors: form.colors, stock_quantity: Number(form.stock_quantity),
       is_new: form.is_new, is_sale: form.is_sale, images: form.images,
     }
+    let result
     if (editId) {
-      await supabase.from('products').update(payload).eq('id', editId)
+      result = await supabase.from('products').update(payload).eq('id', editId)
     } else {
-      await supabase.from('products').insert(payload)
+      result = await supabase.from('products').insert(payload)
+    }
+    if (result.error) {
+      console.error('Save product error:', result.error)
+      alert('Error saving product: ' + result.error.message)
+      setSaving(false)
+      return
     }
     setShowModal(false)
     setSaving(false)
