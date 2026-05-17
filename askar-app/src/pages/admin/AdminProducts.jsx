@@ -69,8 +69,21 @@ export default function AdminProducts() {
   }
 
   async function handleDelete(id) {
-    if (!confirm('This will hide the product and set stock to 0. Continue?')) return
-    await supabase.from('products').update({ is_visible: false, stock_quantity: 0 }).eq('id', id)
+    if (!confirm('هل أنت متأكد من حذف هذا المنتج نهائياً؟ لا يمكن التراجع عن هذا الإجراء.')) return
+    // Delete images from storage first
+    const product = products.find(p => p.id === id)
+    if (product?.images) {
+      for (const img of product.images) {
+        await deleteImage(img)
+      }
+    }
+    // Permanently delete from database
+    const { error } = await supabase.from('products').delete().eq('id', id)
+    if (error) {
+      console.error('Delete error:', error)
+      alert('Error deleting product: ' + error.message)
+      return
+    }
     fetchData()
   }
 
