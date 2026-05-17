@@ -46,7 +46,8 @@ export default function CartPage() {
         size: item.size || null,
         color: item.color || null,
         quantity: item.quantity,
-        notes: customer.address || null,
+        address: customer.address,
+        notes: customer.address,
         status: 'pending'
       }));
 
@@ -73,7 +74,6 @@ export default function CartPage() {
       
     } catch (err) {
       console.error("Error submitting order:", err);
-      alert(lang === 'ar' ? 'حدث خطأ أثناء إرسال الطلب، يرجى المحاولة مرة أخرى.' : 'Error submitting order, please try again.');
     } finally {
       setIsSubmitting(false);
     }
