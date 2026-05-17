@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Search, User, ShoppingBag, Menu, X, Globe } from 'lucide-react';
+import { User, ShoppingBag, Menu, X, Globe } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
@@ -90,9 +90,7 @@ export default function Navbar() {
                 <Globe size={20} className="rtl:ml-1 ltr:mr-1" />
                 <span className="text-xs font-bold uppercase">{lang === 'en' ? 'AR' : 'EN'}</span>
               </button>
-              <button className="hover:text-rose-500 transition-colors hidden sm:block">
-                <Search size={20} />
-              </button>
+
               <Link to="/admin" className="hover:text-rose-500 transition-colors hidden sm:block">
                 <User size={20} />
               </Link>
