@@ -46,6 +46,7 @@ export default function CartPage() {
         size: item.size || null,
         color: item.color || null,
         quantity: item.quantity,
+        total_price: item.quantity * Number(item.product.sale_price || item.product.price),
         address: customer.address,
         notes: customer.address,
         status: 'pending'

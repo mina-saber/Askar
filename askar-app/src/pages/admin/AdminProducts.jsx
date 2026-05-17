@@ -3,7 +3,8 @@ import { supabase, getImageUrl, uploadImage, deleteImage } from '../../lib/supab
 import { Plus, Pencil, Trash2, X, Upload, ImageIcon } from 'lucide-react'
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
-const emptyForm = { name: '', category_id: '', price: '', sale_price: '', description: '', sizes: [], stock_quantity: 0, is_new: false, is_sale: false, images: [] }
+const COLORS = ['Black', 'White', 'Red', 'Blue', 'Navy', 'Gray', 'Beige', 'Brown', 'Green']
+const emptyForm = { name: '', category_id: '', price: '', sale_price: '', description: '', sizes: [], colors: [], stock_quantity: 0, is_new: false, is_sale: false, images: [] }
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([])
@@ -36,7 +37,7 @@ export default function AdminProducts() {
     setForm({
       name: product.name, category_id: product.category_id || '', price: product.price,
       sale_price: product.sale_price || '', description: product.description || '',
-      sizes: product.sizes || [], stock_quantity: product.stock_quantity || 0,
+      sizes: product.sizes || [], colors: product.colors || [], stock_quantity: product.stock_quantity || 0,
       is_new: product.is_new, is_sale: product.is_sale, images: product.images || [],
     })
     setShowModal(true)
@@ -47,7 +48,7 @@ export default function AdminProducts() {
     const payload = {
       name: form.name, category_id: form.category_id || null, price: Number(form.price),
       sale_price: form.sale_price ? Number(form.sale_price) : null,
-      description: form.description, sizes: form.sizes, stock_quantity: Number(form.stock_quantity),
+      description: form.description, sizes: form.sizes, colors: form.colors, stock_quantity: Number(form.stock_quantity),
       is_new: form.is_new, is_sale: form.is_sale, images: form.images,
     }
     if (editId) {
@@ -98,6 +99,10 @@ export default function AdminProducts() {
 
   function toggleSize(size) {
     setForm(f => ({ ...f, sizes: f.sizes.includes(size) ? f.sizes.filter(s => s !== size) : [...f.sizes, size] }))
+  }
+
+  function toggleColor(color) {
+    setForm(f => ({ ...f, colors: f.colors.includes(color) ? f.colors.filter(c => c !== color) : [...f.colors, color] }))
   }
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin"></div></div>
@@ -156,7 +161,23 @@ export default function AdminProducts() {
               </div>
               {form.sale_price && form.price && <p className="text-xs text-gray-500">Discount: {Math.round(((form.price - form.sale_price) / form.price) * 100)}%</p>}
               <div><label className="block text-xs font-semibold tracking-wider mb-1">DESCRIPTION</label><textarea rows={3} value={form.description} onChange={e => setForm({...form, description: e.target.value})} className="admin-input resize-none" /></div>
-              <div><label className="block text-xs font-semibold tracking-wider mb-1">SIZES</label><div className="flex gap-2 flex-wrap">{SIZES.map(s => <button key={s} type="button" onClick={() => toggleSize(s)} className={`px-3 py-1.5 text-xs font-semibold border ${form.sizes.includes(s) ? 'bg-black text-white border-black' : 'border-gray-300'}`}>{s}</button>)}</div></div>
+              <div><label className="block text-xs font-semibold tracking-wider mb-1">SIZES</label><div className="flex gap-2 flex-wrap">{SIZES.map(s => <button key={s} type="button" onClick={() => toggleSize(s)} className={`px-3 py-1.5 text-xs font-semibold border rounded transition-colors ${form.sizes.includes(s) ? 'bg-black text-white border-black' : 'border-gray-300'}`}>{s}</button>)}</div></div>
+              <div>
+                <label className="block text-xs font-semibold tracking-wider mb-1">COLORS</label>
+                <div className="flex gap-2 flex-wrap">
+                  {COLORS.map(c => (
+                    <button 
+                      key={c} 
+                      type="button" 
+                      onClick={() => toggleColor(c)} 
+                      className={`flex items-center gap-2 px-3 py-1.5 text-xs font-semibold border rounded transition-colors ${form.colors.includes(c) ? 'border-black bg-gray-50 ring-1 ring-black' : 'border-gray-300 hover:bg-gray-50'}`}
+                    >
+                      <span className="w-3 h-3 rounded-full border border-gray-200" style={{ backgroundColor: c }}></span>
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div><label className="block text-xs font-semibold tracking-wider mb-1">STOCK QUANTITY</label><input type="number" value={form.stock_quantity} onChange={e => setForm({...form, stock_quantity: e.target.value})} className="admin-input" /></div>
               <div className="flex gap-6">
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_new} onChange={e => setForm({...form, is_new: e.target.checked})} className="accent-black" /> New Arrival</label>
